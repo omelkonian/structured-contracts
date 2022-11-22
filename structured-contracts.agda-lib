@@ -1,0 +1,5 @@
+name: structured-contracts
+depend:
+  standard-library
+  formal-prelude
+include: .
