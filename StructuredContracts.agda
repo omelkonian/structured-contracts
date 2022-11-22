@@ -15,6 +15,7 @@ SSRel (Env , State , Input) = Env → State → Input → State → Type
 postulate
   LEnv LState Tx : Type
   _⊢_—⟨_∣UTXOW⟩→_ : SSRel (LEnv , LState , Tx)
+
 variable
   env : LEnv
   utxoSt utxoSt′ : LState
@@ -33,6 +34,7 @@ postulate
   TxInfo : Type
   getUTxO : LState → Tx → TxInfo
   isValid : Tx → Bool
+
 variable
   txInfo : TxInfo
 
@@ -50,7 +52,7 @@ module Simulation
       ∙ T (isValid tx)
       ∙ πⁱ txInfo ≢ ε
       ∙ env ⊢ utxoSt —⟨ tx ∣LEDGER⟩→ utxoSt′
-        ──────────────────────────────────────────────────
+        ───────────────────────────────────────────────────
         txInfo ⊢ πˢ utxoSt —⟨ πⁱ txInfo ∣SMUP⟩→ πˢ utxoSt′)
       ────────────
       StatefulStep
@@ -86,6 +88,7 @@ postulate
   SpendsNFT PutsNFT PropagatesNFT : Pred₀ TxInfo
   buildConstraints : TxInfo → List (SMS → SMI → Bool)
   _⊢_—⟨_∣SMPEC⟩→_ : SSRel (TxInfo , (SMS × Value) , SMI)
+
 variable
   sms sms′ : SMS
   smi : SMI
@@ -137,6 +140,7 @@ postulate
   instance _ : Monoid AccI
   txInfoSignatories : TxInfo → List Key
   itype : AccI → IType
+
 variable
   accIn : AccI
   accts : Map⟨ Id ↦ Account ⟩
@@ -151,7 +155,7 @@ data _⊢_—⟨_∣ACCNT⟩→_ : SSRel (TxInfo , Map⟨ Id ↦ Account ⟩ , A
     ∙ accIn .id ∉ᵈ accts
     ∙ newAcct .pk ≡ accIn .pk
     ∙ newAcct .value ≡ ε
-      ───────────────────────────────────────────────────────────────────
+      ──────────────────────────────────────────────────────────────────────────
       txInfo ⊢ accts —⟨ accIn ∣ACCNT⟩→ (accts ∪ singleton (accIn .id , newAcct))
 
   Close :
@@ -160,7 +164,7 @@ data _⊢_—⟨_∣ACCNT⟩→_ : SSRel (TxInfo , Map⟨ Id ↦ Account ⟩ , A
     ∙ accts [ accIn .id ↦ acntToClose ]
     ∙ accIn .pk ∈ txInfoSignatories txInfo
     ∙ acntToClose .value ≡ ε
-      ───────────────────────────────────────────────────
+      ────────────────────────────────────────────────────
       txInfo ⊢ accts —⟨ accIn ∣ACCNT⟩→ (accIn .id ⋪ accts)
 
 postulate LEDGER-simulates-ACCNT : IsSimulation _⊢_—⟨_∣ACCNT⟩→_
