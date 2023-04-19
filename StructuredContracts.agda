@@ -40,6 +40,7 @@ variable
 
 module Simulation
   {State Input : Type}
+  ⦃ _ : Semigroup Input ⦄
   ⦃ _ : Monoid Input ⦄
   (πˢ : LState → State)
   (πⁱ : TxInfo → Input)
@@ -68,7 +69,7 @@ module Simulation
       ──────────────
       StatefulNoStep
 
-IsSimulation : ∀ {S I : Type} → ⦃ Monoid I ⦄ → Pred₀ (SSRel (TxInfo , S , I))
+IsSimulation : ∀ {S I : Type} ⦃ _ : Semigroup I ⦄ → ⦃ Monoid I ⦄ → Pred₀ (SSRel (TxInfo , S , I))
 IsSimulation {S}{I} ssRel =
   ∃ λ (πˢ : LState → S) → ∃ λ (πⁱ : TxInfo → I) →
   let open Simulation πˢ πⁱ ssRel in
@@ -81,9 +82,9 @@ IsSimulation {S}{I} ssRel =
 
 postulate
   SMS SMI Value : Type
-  instance _ : Monoid SMS
-           _ : Monoid Value
-           _ : Monoid SMI
+  instance _ : Semigroup SMS; _ : Monoid SMS
+           _ : Semigroup Value; _ : Monoid Value
+           _ : Semigroup SMI; _ : Monoid SMI
   initState : SMS × Value
   SpendsNFT PutsNFT PropagatesNFT : Pred₀ TxInfo
   buildConstraints : TxInfo → List (SMS → SMI → Bool)
@@ -137,7 +138,7 @@ open Account
 unquoteDecl Derive-Account = DERIVE DecEq [ quote Account , Derive-Account ]
 
 postulate
-  instance _ : Monoid AccI
+  instance _ : Semigroup AccI; _ : Monoid AccI
   txInfoSignatories : TxInfo → List Key
   itype : AccI → IType
 
