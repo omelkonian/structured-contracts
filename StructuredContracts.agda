@@ -1,14 +1,4 @@
-open import Prelude.Init hiding (id); open SetAsType
-open import Prelude.InferenceRules
-open import Prelude.Semigroup
-open import Prelude.Monoid
-open import Prelude.Membership
-open import Prelude.DecEq
-open import Prelude.Maps
-
--- small-step relations
-SSRel : Type × Type × Type → Type₁
-SSRel (Env , State , Input) = Env → State → Input → State → Type
+open import Prelude hiding (id)
 
 -- ** Ledger
 

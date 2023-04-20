@@ -1,25 +1,6 @@
 module UTxO where
 
-open import Prelude.Init; open SetAsType
-open L.Mem
-open import Prelude.General
-open import Prelude.Maybes
-open import Prelude.DecEq
-open import Prelude.Decidable
-open import Prelude.ToN
-open import Prelude.Lists hiding (_⁉_; _‼_; map↦)
-open import Prelude.Lists.Dec
-open import Prelude.Lists.WithK
-open import Prelude.Functor
-open import Prelude.Applicative
-open import Prelude.Semigroup
-open import Prelude.Monoid
-open import Prelude.FromList
-open import Prelude.Membership using (_∈?_; _∉?_)
-open import Prelude.Irrelevance
-open import Prelude.Apartness
-
-open import Prelude.Maps
+open import Prelude
 
 Value   = ℕ
 HashId  = ℕ
@@ -120,40 +101,21 @@ unquoteDecl DecEq-TxOR = DERIVE DecEq [ quote TxOutputRef , DecEq-TxOR ]
 open CommonInfo TxOutputRef public
 
 -- The state of a ledger maps output references locked by a validator to a value.
-
-private
-  S : Type
-  S = Map⟨ TxOutputRef ↦ TxOutput ⟩
-
-UTxO = S
+UTxO = Map⟨ TxOutputRef ↦ TxOutput ⟩
 
 mkUtxo : ∀ {out} tx → out L.Mem.∈ outputs tx → TxOutputRef × TxOutput
 mkUtxo {out} tx out∈ = (tx ♯) indexed-at toℕ (L.Any.index out∈) , out
 
-utxoTx : Tx → S
+utxoTx : Tx → UTxO
 utxoTx tx = fromList $ L.Mem.mapWith∈ (tx .outputs) (mkUtxo tx)
 
--- ** Utilities relating Prelude.Maps and Prelude.Bags.
-module _ {K V : Type} ⦃ _ : DecEq K ⦄ ⦃ _ : DecEq V ⦄ where
-  open import Prelude.ToList
-  import Prelude.Sets as S
-
-  _‼_ : {k : K} (m : Map⟨ K ↦ V ⟩) → k ∈ᵈ m → V
-  m ‼ k∈ = destruct-Is-just (∈ᵈ⇒⁉ m k∈) .proj₁
-
-  _─ᵏˢ_ : Map⟨ K ↦ V ⟩ → List K → Map⟨ K ↦ V ⟩
-  m ─ᵏˢ ks = filterK (_∉? ks) m
-
-  keys : Map⟨ K ↦ V ⟩ → List K
-  keys = map proj₁ ∘ toList
-
-  values : Map⟨ K ↦ V ⟩ → List V
-  values = map proj₂ ∘ toList
+totalValue : UTxO → Value
+totalValue = ∑ℕ ∘ map value ∘ values
 
 applyTx : Tx → (UTxO → UTxO)
 applyTx tx utxo = (utxo ─ᵏˢ outputRefs tx) ∪ utxoTx tx
 
-record IsValidTx (tx : Tx) (utxos : S) : Type where
+record IsValidTx (tx : Tx) (utxos : UTxO) : Type where
   field
     noDoubleSpending :
       ·Unique (outputRefs tx)
@@ -179,6 +141,11 @@ record IsValidTx (tx : Tx) (utxos : S) : Type where
     validateValidHashes :
       ∀[ (i , o) ∈ resolvedInputs ]
         (o .address ≡ i .validator ♯)
+
+  postulate
+    nextValue≡ :
+      totalValue ((utxos ─ᵏˢ outputRefs tx) ∪ utxoTx tx)
+      ≡ (totalValue utxos + ∑ (tx .outputs) value) ∸ ∑ resolvedInputs (value ∘ proj₂)
 
 open IsValidTx public
 
@@ -234,7 +201,7 @@ isValidTx? tx s@(_ ⊣ ·uniq)
   ; allInputsValidate = aiv
   ; validateValidHashes = vvh }
 
-isValidTx : Tx → S → Bool
+isValidTx : Tx → UTxO → Bool
 isValidTx tx s = ⌊ isValidTx? tx s ⌋
 
 checkTx : TxInfo → UTxO → Tx → Bool
@@ -249,4 +216,12 @@ variable
   tx : Tx
   txi : TxInfo
   utxo utxo′ : UTxO
-  v v′ : Value
+  v v′ v″ : Value
+
+-- ** LEDGER small-step relation
+data _⊢_—⟨_∣LEDGER⟩→_ : SSRel (TxInfo , UTxO , Tx) where
+
+  ApplyTx : let utxo′ = applyTx tx utxo in
+    T (checkTx txi utxo tx)
+    ──────────────────────────────────
+    txi ⊢ utxo —⟨ tx ∣LEDGER⟩→ utxo′

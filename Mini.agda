@@ -1,6 +1,4 @@
-open import Prelude.Init; open SetAsType
-open import Prelude.Semigroup
-open import Prelude.InferenceRules
+open import Prelude hiding (SSRel)
 
 variable
   n m : ℕ

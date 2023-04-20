@@ -1,7 +1,7 @@
-open import StructuredContracts
+open import Prelude
+
 open import Mini
+open import StructuredContracts
 
---
-
-open import SmallStep
-open import Reification
+open import UTxO
+open import POV
