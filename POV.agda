@@ -3,7 +3,7 @@ module POV where
 open import Prelude
 open import UTxO
 
-data _⊢_—⟨_∣POV⟩→_ : SSRel (TxInfo , Value , Value) where
+data _⊢_—⟨_∣POV⟩→_ : SSRel TxInfo Value Value where
 
   UpdateValTotal : let i = mint txi in
     ──────────────────────────────────
@@ -47,9 +47,9 @@ LEDGER-reifies-POV = record
         QED rewrite H = UpdateValTotal {txi = txi} {v = π s}
 
 POV :
-  txi ⊢ utxo —⟨ tx ∣LEDGER⟩→ utxo′
+  txi ⊢ utxos —⟨ tx ∣LEDGER⟩→ utxos′
   ──────────────────────────────────────────────
-  totalValue utxo′ ≡ totalValue utxo + tx .forge
+  totalValue utxos′ ≡ totalValue utxos + tx .forge
 POV = viewPOV ∘ LEDGER-reifies-POV .implements _ _ _ _
   where
     viewPOV : txi ⊢ v —⟨ v″ ∣POV⟩→ v′ → v′ ≡ v + v″

@@ -4,14 +4,14 @@ open import Prelude hiding (id)
 
 postulate
   LEnv LState Tx : Type
-  _⊢_—⟨_∣UTXOW⟩→_ : SSRel (LEnv , LState , Tx)
+  _⊢_—⟨_∣UTXOW⟩→_ : SSRel LEnv LState Tx
 
 variable
   env : LEnv
   utxoSt utxoSt′ : LState
   tx : Tx
 
-data _⊢_—⟨_∣LEDGER⟩→_ : SSRel (LEnv , LState , Tx) where
+data _⊢_—⟨_∣LEDGER⟩→_ : SSRel LEnv LState Tx where
 
   ledger-V :
     env ⊢ utxoSt —⟨ tx ∣UTXOW⟩→ utxoSt′
@@ -34,7 +34,7 @@ module Simulation
   ⦃ _ : Monoid Input ⦄
   (πˢ : LState → State)
   (πⁱ : TxInfo → Input)
-  (_⊢_—⟨_∣SMUP⟩→_ : SSRel (TxInfo , State , Input))
+  (_⊢_—⟨_∣SMUP⟩→_ : SSRel TxInfo State Input)
   where
 
   data StatefulStep : Type where
@@ -59,7 +59,7 @@ module Simulation
       ──────────────
       StatefulNoStep
 
-IsSimulation : ∀ {S I : Type} ⦃ _ : Semigroup I ⦄ → ⦃ Monoid I ⦄ → Pred₀ (SSRel (TxInfo , S , I))
+IsSimulation : ∀ {S I : Type} ⦃ _ : Semigroup I ⦄ → ⦃ Monoid I ⦄ → Pred₀ (SSRel TxInfo S I)
 IsSimulation {S}{I} ssRel =
   ∃ λ (πˢ : LState → S) → ∃ λ (πⁱ : TxInfo → I) →
   let open Simulation πˢ πⁱ ssRel in
@@ -78,14 +78,14 @@ postulate
   initState : SMS × Value
   SpendsNFT PutsNFT PropagatesNFT : Pred₀ TxInfo
   buildConstraints : TxInfo → List (SMS → SMI → Bool)
-  _⊢_—⟨_∣SMPEC⟩→_ : SSRel (TxInfo , (SMS × Value) , SMI)
+  _⊢_—⟨_∣SMPEC⟩→_ : SSRel TxInfo (SMS × Value) SMI
 
 variable
   sms sms′ : SMS
   smi : SMI
   val val′ : Value
 
-data _⊢_—⟨_∣NFTCE⟩→_ : SSRel (TxInfo , (SMS × Value) , SMI) where
+data _⊢_—⟨_∣NFTCE⟩→_ : SSRel TxInfo (SMS × Value) SMI where
 
   MintsNFT :
     ∙ SpendsNFT txInfo
@@ -137,7 +137,7 @@ variable
   accts : Map⟨ Id ↦ Account ⟩
   newAcct acntToClose : Account
 
-data _⊢_—⟨_∣ACCNT⟩→_ : SSRel (TxInfo , Map⟨ Id ↦ Account ⟩ , AccI) where
+data _⊢_—⟨_∣ACCNT⟩→_ : SSRel TxInfo Map⟨ Id ↦ Account ⟩ AccI where
 
   Open :
 

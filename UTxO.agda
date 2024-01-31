@@ -4,6 +4,7 @@ open import Prelude
 
 Value   = ℕ
 HashId  = ℕ
+Slot    = ℕ
 Address = HashId
 postulate _♯ : ∀ {A : Type ℓ} → A → HashId
 
@@ -115,6 +116,11 @@ totalValue = ∑ℕ ∘ map value ∘ values
 applyTx : Tx → (UTxO → UTxO)
 applyTx tx utxo = (utxo ─ᵏˢ outputRefs tx) ∪ utxoTx tx
 
+utxo : L → UTxO
+utxo = λ where
+  [] → ∅
+  (tx ∷ l) → applyTx tx (utxo l)
+
 record IsValidTx (tx : Tx) (utxos : UTxO) : Type where
   field
     noDoubleSpending :
@@ -214,14 +220,43 @@ mint = TxInfo.forge
 
 variable
   tx : Tx
+  l : L
   txi : TxInfo
-  utxo utxo′ : UTxO
+  utxos utxos′ : UTxO
   v v′ v″ : Value
 
 -- ** LEDGER small-step relation
-data _⊢_—⟨_∣LEDGER⟩→_ : SSRel (TxInfo , UTxO , Tx) where
+data _⊢_—⟨_∣LEDGER⟩→_ : SSRel TxInfo UTxO Tx where
 
-  ApplyTx : let utxo′ = applyTx tx utxo in
-    T (checkTx txi utxo tx)
+  ApplyTx : let utxos′ = applyTx tx utxos in
+    T (checkTx txi utxos tx)
     ──────────────────────────────────
-    txi ⊢ utxo —⟨ tx ∣LEDGER⟩→ utxo′
+    txi ⊢ utxos —⟨ tx ∣LEDGER⟩→ utxos′
+
+-- ** TX-LEDGER small-step relation
+data _⊢_—⟨_∣TX-LEDGER⟩→_ : SSRel ⊤ L Tx where
+
+  ApplyTx :
+    IsValidTx tx (utxo l)
+    ─────────────────────────────────
+    _ ⊢ l —⟨ tx ∣TX-LEDGER⟩→ (tx ∷ l)
+
+postulate
+  TX-LEDGER-reifies-LEDGER : _⊢_—⟨_∣TX-LEDGER⟩→_ ≼ _⊢_—⟨_∣LEDGER⟩→_
+-- TX-LEDGER-reifies-LEDGER = record
+--   { πₑ = λ _ s tx → mkTxInfo tx {!resolved valid!} -- (resolved valid)
+--   ; πₛ = π
+--   ; πᵢ = id
+--   ; implements = proof
+--   }
+--   where
+--     π = utxo
+
+--     getValid : ∀ {Γ l tx l′} → Γ ⊢ l —⟨ tx ∣TX-LEDGER⟩→ l′ → IsValidTx tx (utxo l)
+--     getValid (ApplyTx val) = val
+
+--     proof : ∀ Γ l tx l′ →
+--       (l→ : Γ ⊢ l —⟨ tx ∣TX-LEDGER⟩→ l′) →
+--       ──────────────────────────────────────
+--       mkTxInfo tx {!resolved $ getValid l→ !} ⊢ utxo l —⟨ tx ∣LEDGER⟩→ utxo l′
+--     proof _ l tx .(tx ∷ l) (ApplyTx val) = {!!}
