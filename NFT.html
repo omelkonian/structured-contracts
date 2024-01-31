@@ -1,0 +1,26 @@
+<!DOCTYPE HTML>
+<html><head><meta charset="utf-8"><title>NFT</title><link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.3/gh-fork-ribbon.min.css'/><style>.github-fork-ribbon:before { background-color: #333; }</style><link rel="stylesheet" href="css/Agda.css"></head><body><a class='github-fork-ribbon'href='https://github.com/omelkonian/structured-contracts/tree/master/NFT.agda'data-ribbon='Source code on Github' title='Source code on Github'>Source code on Github</a><pre class="Agda"><a id="1" class="Keyword">module</a> <a id="8" href="NFT.html" class="Module">NFT</a> <a id="12" class="Keyword">where</a>
+
+<a id="19" class="Keyword">open</a> <a id="24" class="Keyword">import</a> <a id="31" href="Prelude.html" class="Module">Prelude</a>
+<a id="39" class="Keyword">open</a> <a id="44" class="Keyword">import</a> <a id="51" href="Prelude.Ord.html" class="Module">Prelude.Ord</a>
+<a id="63" class="Keyword">open</a> <a id="68" class="Keyword">import</a> <a id="75" href="EUTxO.html" class="Module">EUTxO</a>
+
+<a id="82" class="Keyword">instance</a>
+  <a id="93" href="NFT.html#93" class="Function">_</a> <a id="95" class="Symbol">=</a> <a id="97" href="Prelude.Semigroup.html#4333" class="Function">Semigroup-ℕ-+</a>
+  <a id="113" href="NFT.html#113" class="Function">_</a> <a id="115" class="Symbol">=</a> <a id="117" href="Prelude.Monoid.html#3120" class="Function">Monoid-ℕ-+</a>
+
+<a id="129" class="Keyword">private</a> <a id="137" class="Keyword">variable</a> <a id="146" href="NFT.html#146" class="Generalizable">tks</a> <a id="150" class="Symbol">:</a> <a id="152" href="Prelude.Maps.AsSets.html#550" class="Record">Map⟨</a> <a id="157" href="EUTxO.html#107" class="Function">TokenName</a> <a id="167" href="Prelude.Maps.AsSets.html#550" class="Record">↦</a> <a id="169" href="EUTxO.html#121" class="Function">Quantity</a> <a id="178" href="Prelude.Maps.AsSets.html#550" class="Record">⟩</a>
+
+<a id="181" class="Keyword">postulate</a> <a id="myNFTPolicy"></a><a id="191" href="NFT.html#191" class="Postulate">myNFTPolicy</a> <a id="203" class="Symbol">:</a> <a id="205" href="EUTxO.html#210" class="Function">Hash</a>
+
+<a id="211" class="Keyword">data</a> <a id="_⊢_—⟨_∣NFT⟩→_"></a><a id="216" href="NFT.html#216" class="Datatype Operator">_⊢_—⟨_∣NFT⟩→_</a> <a id="230" class="Symbol">:</a> <a id="232" href="Prelude.html#1305" class="Function">SSRel</a> <a id="238" href="Agda.Builtin.Unit.html#158" class="Record">⊤</a> <a id="240" href="EUTxO.html#136" class="Function">Value</a> <a id="246" href="EUTxO.html#1397" class="Record">Tx</a> <a id="249" class="Keyword">where</a>
+  <a id="_⊢_—⟨_∣NFT⟩→_.UpdateNFTTotal"></a><a id="257" href="NFT.html#257" class="InductiveConstructor">UpdateNFTTotal</a> <a id="272" class="Symbol">:</a>
+    <a id="278" class="Keyword">let</a>
+      <a id="288" href="NFT.html#288" class="Bound">i</a>  <a id="291" class="Symbol">=</a> <a id="293" href="Prelude.Maps.AsSets.html#944" class="Function">singleton</a> <a id="303" class="Symbol">(</a><a id="304" href="NFT.html#191" class="Postulate">myNFTPolicy</a> <a id="316" href="Agda.Builtin.Sigma.html#218" class="InductiveConstructor Operator">,</a> <a id="318" href="NFT.html#146" class="Generalizable">tks</a><a id="321" class="Symbol">)</a>
+      <a id="329" href="NFT.html#329" class="Bound">v′</a> <a id="332" class="Symbol">=</a> <a id="334" href="EUTxO.html#5131" class="Generalizable">v</a> <a id="336" href="Prelude.Maps.AsSets.html#1469" class="Function Operator">∪</a> <a id="338" href="NFT.html#288" class="Bound">i</a>
+    <a id="344" class="Keyword">in</a>
+
+    <a id="352" href="NFT.html#146" class="Generalizable">tks</a> <a id="356" href="Prelude.Maps.AsSets.html#5651" class="Function Operator">≤ᵐ</a> <a id="359" href="Data.Maybe.Base.html#1641" class="Function">fromMaybe</a> <a id="369" href="Prelude.Maps.AsSets.html#930" class="InductiveConstructor">∅</a> <a id="371" class="Symbol">(</a><a id="372" href="EUTxO.html#5062" class="Generalizable">tx</a> <a id="375" class="Symbol">.</a><a id="376" href="EUTxO.html#1492" class="Field">mint</a> <a id="381" href="Prelude.Maps.AsSets.html#1885" class="Function Operator">⁉</a> <a id="383" href="NFT.html#191" class="Postulate">myNFTPolicy</a><a id="394" class="Symbol">)</a>
+    <a id="400" href="Prelude.InferenceRules.html#13287" class="Function Operator">───────────────────────────────────────────</a>
+    <a id="448" class="Symbol">_</a> <a id="450" href="NFT.html#216" class="Datatype Operator">⊢</a> <a id="452" href="EUTxO.html#5131" class="Generalizable">v</a> <a id="454" href="NFT.html#216" class="Datatype Operator">—⟨</a> <a id="457" href="EUTxO.html#5062" class="Generalizable">tx</a> <a id="460" href="NFT.html#216" class="Datatype Operator">∣NFT⟩→</a> <a id="467" href="EUTxO.html#5131" class="Generalizable">v</a>
+</pre></body></html>
