@@ -1,11 +1,11 @@
-TOTAL: 0m31s
+TOTAL: 0m47s
 Prelude: 0m16s
 Mini: 0m1s
 StructuredContracts: 0m1s
-UTxO: 0m4s
-Struc: 0m0s
-POV: 0m1s
 EUTxO: 0m2s
-NFT: 0m0s
+Struc: 0m1s
+UTxO: 0m4s
+POV: 0m1s
+NFT: 0m16s
 Toggle: 0m0s
-Main: 0m1s
+Main: 0m0s
